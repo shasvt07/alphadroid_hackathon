@@ -10,7 +10,7 @@ import { useFrame, useLoader } from "@react-three/fiber";
 import demoaudio from "../assets/charlievoice.mp3";
 import jsonFile from "../assets/charlievoice.json";
 import Phonetics, { metaphone } from "phonetics";
-import { SpeakContext } from "../context/speakContext";
+import { SpeakContext } from "../context/SpeakContext";
 const corresponding = {
   A: "viseme_aa",
   B: "viseme_E",
@@ -43,7 +43,7 @@ const corresponding = {
 export default function FinalAvatar(props) {
   const {toSpeak,nextToSpeak} = useContext(SpeakContext);
   const [animation, setAnimation] = useState("Wellcome");
-  const [text, setText] = useState("Wellcome to Alphadroid. I am a Avatar Forge demo bot. How may I help you?");
+  const [text, setText] = useState("Welcome to Alphadroid. I am a Avatar Forge demo bot. How may I help you?");
   const [spell, setSpell] = useState("");
   const spellTime = useRef(0);
   const group = useRef();
@@ -55,8 +55,23 @@ export default function FinalAvatar(props) {
   }, [animation]);
 
   useEffect(() => {
+      setAnimation("Wellcome");
+      const msg = generateAudio(text);
+      const phonetics = metaphone(msg.text);
+      setSpell(phonetics);
+      speechSynthesis.speak(msg);
+  },[text])
+
+  useEffect(() => {
+    nodes.Wolf3D_Head.morphTargetInfluences[
+      nodes.Wolf3D_Head.morphTargetDictionary["viseme_I"]
+    ] = 0;
+    nodes.Wolf3D_Teeth.morphTargetInfluences[
+      nodes.Wolf3D_Teeth.morphTargetDictionary["viseme_I"]
+    ] = 1;
+    
     if(toSpeak !== null){
-      setText(toSpeak);
+      setAnimation("Talking");
       nextToSpeak(null);
       const msg = generateAudio(toSpeak);
       const phonetics = metaphone(msg.text);
@@ -77,6 +92,7 @@ export default function FinalAvatar(props) {
   const { animations: welcomeAnimation } = useGLTF(welcomeScene);
 
   const generateAudio = (text) => {
+    setAnimation('Talking');
     const msg = new SpeechSynthesisUtterance();
     msg.volume = 1; // 0 to 1
     msg.rate = 0.8; // 0.1 to 10
@@ -96,13 +112,16 @@ export default function FinalAvatar(props) {
   };
 
 
-  const { playAudio, headFollow, smoothMorphTarget, morphTargetSmoothing } =
-    useControls({
-      playAudio: false,
-      headFollow: true,
-      smoothMorphTarget: true,
-      morphTargetSmoothing: 0.5,
-    });
+  // const { playAudio, headFollow, smoothMorphTarget, morphTargetSmoothing } =
+  //   useControls({
+  //     playAudio: false,
+  //     headFollow: true,
+  //     smoothMorphTarget: true,
+  //     morphTargetSmoothing: 0.5,
+  //   });
+    const smoothMorphTarget = true;
+    const morphTargetSmoothing = 0.5;
+
 
   idleAnimation[0].name = "Idle";
   talkingAnimation[0].name = "Talking";
@@ -112,18 +131,19 @@ export default function FinalAvatar(props) {
     scene
   );
   const { actions } = allAnimation;
-  
+    
+  console.log(animation);
 
 
   useFrame(() => {
-    
+    setAnimation("Talking");
     const currentAudioTime = Date.now()/1000;
     if(currentAudioTime > spellTime.current + 0.3){
       spellTime.current = currentAudioTime+0.3;
-      setAnimation('Talking');
+      // setAnimation('Talking');
     }
     if ((speechSynthesis.paused || !speechSynthesis.speaking)) {
-      setAnimation("Idle");
+      // setAnimation("Idle");
       return;
     }
     Object.values(corresponding).forEach((value) => {
@@ -206,32 +226,6 @@ export default function FinalAvatar(props) {
     }
   });
 
-  useEffect(() => {
-    nodes.Wolf3D_Head.morphTargetInfluences[
-      nodes.Wolf3D_Head.morphTargetDictionary["viseme_I"]
-    ] = 0;
-    nodes.Wolf3D_Teeth.morphTargetInfluences[
-      nodes.Wolf3D_Teeth.morphTargetDictionary["viseme_I"]
-    ] = 1;
-    if (playAudio) {
-      const msg = generateAudio(text);
-      const phonetics = metaphone(msg.text);
-      setSpell(phonetics);
-      speechSynthesis.speak(msg);
-      // speechSynthesis.resume();
-      setAnimation("Talking");
-    } else {
-      // speechSynthesis.pause();
-      // if(animation === 'Talking')
-      setAnimation("Wellcome");
-    }
-  }, [playAudio]);
-  useFrame((state) => {
-    if (headFollow) {
-      group.current.getObjectByName("LeftEye").lookAt(state.camera.position);
-      group.current.getObjectByName("RightEye").lookAt(state.camera.position);
-    }
-  });
 
   return (
     <group {...props} ref={group} dispose={null}>

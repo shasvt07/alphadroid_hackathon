@@ -7,9 +7,9 @@ import Message from "../smallComponents/Message";
 import "../css/Chat.css";
 import { data } from "../data/question";
 import { ChatContext } from "../context/ChatContext";
-import { SpeakContext } from "../context/speakContext";
+import { SpeakContext } from "../context/SpeakContext";
 import useSpeechRecognition from "../hooks/useSpeechRecognistionHook";
-
+import { useEffect } from "react";
 
 var messages = [
   {
@@ -64,7 +64,10 @@ const Chats = () => {
   const [topic, setTopic] = useState('');
   const {chats,addChat,removeChat} = useContext(ChatContext);
   const [subtopic, setSubTopic] = useState('');
-
+  useEffect(() => {
+    if(!isListening && text !== '') 
+      addChat({bot:false,question:text});
+  }, [text]);
   return (
     <>
       <div className="chat-body">
@@ -98,7 +101,7 @@ const Chats = () => {
         ) : (
           <div className="chat-container">
             {data.map((temp) => (temp.name === topic && temp.questions.map((message) => (
-              <Message message={{...message,bot:false}} 
+              <Message message={{...message,bot:true}} 
               onClick={()=>{setSubTopic(message.question); addChat({bot:true,question:message.question})}}
               />
             ))))}
@@ -110,6 +113,7 @@ const Chats = () => {
           onClick={() => {
             setmicOn(!micOn)
             !micOn ? startListening() : stopListening();
+            // addChat({bot:false,question:text})
           }}
         >
           { micOn ?
