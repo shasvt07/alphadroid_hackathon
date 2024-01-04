@@ -22,7 +22,7 @@ function Home() {
         width: "100vw",
         display: "flex",
         flexDirection: "row",
-        backgroundColor: '#0d1117'
+        // backgroundColor: '#0d1117'
       }}
     >
       <div style={{ flex: 1 }}>

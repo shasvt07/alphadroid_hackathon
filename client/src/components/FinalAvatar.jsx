@@ -10,7 +10,7 @@ import { useFrame, useLoader } from "@react-three/fiber";
 import demoaudio from "../assets/charlievoice.mp3";
 import jsonFile from "../assets/charlievoice.json";
 import Phonetics, { metaphone } from "phonetics";
-import { SpeakContext } from "../context/speakContext";
+import { SpeakContext } from "../context/SpeakContext";
 const corresponding = {
   A: "viseme_aa",
   B: "viseme_E",
@@ -43,7 +43,7 @@ const corresponding = {
 export default function FinalAvatar(props) {
   const {toSpeak,nextToSpeak} = useContext(SpeakContext);
   const [animation, setAnimation] = useState("Wellcome");
-  const [text, setText] = useState("Wellcome to Alphadroid. I am a Avatar Forge demo bot. How may I help you?");
+  const [text, setText] = useState("Welcome to Alphadroid. I am a Avatar Forge demo bot. How may I help you?");
   const [spell, setSpell] = useState("");
   const spellTime = useRef(0);
   const group = useRef();
